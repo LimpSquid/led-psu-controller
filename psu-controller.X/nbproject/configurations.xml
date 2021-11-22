@@ -13,6 +13,9 @@
       <itemPath>include/sys.h</itemPath>
       <itemPath>include/timer.h</itemPath>
       <itemPath>include/util.h</itemPath>
+      <itemPath>include/button.h</itemPath>
+      <itemPath>include/timer_config.h</itemPath>
+      <itemPath>include/button_config.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -30,6 +33,8 @@
       <itemPath>source/print.c</itemPath>
       <itemPath>source/sys.c</itemPath>
       <itemPath>source/timer.c</itemPath>
+      <itemPath>source/psu.c</itemPath>
+      <itemPath>source/button.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

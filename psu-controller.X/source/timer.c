@@ -1,9 +1,19 @@
 #include <timer.h>
+#include <timer_config.h>
 #include <kernel_task.h>
 #include <assert_util.h>
 #include <util.h>
 #include <stddef.h>
 #include <limits.h>
+
+#if !defined(TIMER_TICK_INTERVAL)
+    #error "Timer tick interval is not specified, please define 'TIMER_TICK_INTERVAL'"
+#elif !defined(TIMER_POOL_SIZE)
+    #error "Timer pool size is not specified, please define 'TIMER_POOL_SIZE'"
+#endif
+
+STATIC_ASSERT(TIMER_TICK_INTERVAL > 0)
+STATIC_ASSERT(TIMER_POOL_SIZE > 0)
 
 #define TIMER_SEC_MAX   (BIT_SHIFT(12) - 1) // Time unit seconds is limited to 12 bits
 
@@ -15,27 +25,18 @@ struct timer_module
 
     struct
     {
-        unsigned char type        :3;
-        unsigned char assigned    :1;
-        unsigned char suspended   :1;
-        unsigned char reserved    :2;
+        unsigned char type      :3;
+        unsigned char assigned  :1;
+        unsigned char suspended :1;
+        unsigned char _         :2;
     } opt;
 };
 
-static int timer_ttask_init(void);
 static void timer_ttask_execute(void);
 static void timer_ttask_configure(struct kernel_ttask_param* const param);
-KERN_TTASK(timer, timer_ttask_init, timer_ttask_execute, timer_ttask_configure, KERN_INIT_EARLY);
+KERN_TTASK(timer, NULL, timer_ttask_execute, timer_ttask_configure, KERN_INIT_EARLY);
 
-#ifdef TIMER_POOL_SIZE
-    #if (TIMER_POOL_SIZE < 1)
-        #error "Timer pool size must be a non negative integer with a minimum of 1"
-    #else
-        static struct timer_module timer_pool[TIMER_POOL_SIZE];
-    #endif
-#else
-    #error "Define timer pool size 'TIMER_POOL_SIZE' with a number >= 1"
-#endif
+static struct timer_module timer_pool[TIMER_POOL_SIZE];
 
 static unsigned long timer_compute_ticks(int time, int unit)
 {
@@ -58,14 +59,6 @@ static unsigned long timer_compute_ticks(int time, int unit)
     return ticks;
 }
 
-static int timer_ttask_init(void)
-{
-    for(unsigned int i = 0; i < TIMER_POOL_SIZE; ++i)
-        timer_pool[i].opt.assigned = false;
-
-    return KERN_INIT_SUCCESS;
-}
-
 static void timer_ttask_execute(void)
 {
     void (*execute)(struct timer_module*) = NULL;
@@ -80,7 +73,7 @@ static void timer_ttask_execute(void)
 
             if(timed_out) {
                 switch(timer->opt.type) {
-                    case TIMER_TYPE_SOFT:
+                    case TIMER_TYPE_RECURRENT:
                         if(execute == NULL) { // Yay, we can execute this timer's handle
                             timer->ticks = timer->interval; // Reset tick count
                             execute = timer->execute;
