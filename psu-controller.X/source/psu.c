@@ -49,7 +49,7 @@ static void psu_button_event_handler(enum button_event event)
                 default:;
             }
             break;
-        case BUTTON_CLICK_LONG:
+        case BUTTON_PRESS_LONG:
             switch(psu_status) {
                 case PSU_ON:    psu_state = PSU_POWER_OFF;  break;
                 case PSU_OFF:   psu_state = PSU_POWER_ON;   break;
