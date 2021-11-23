@@ -3,9 +3,10 @@
 #include <button.h>
 #include <util.h>
 
-#define PSU_POWER_ON_BOOT_DELAY         30 // In seconds
-#define PSU_POWER_OFF_SHUTDOWN_DELAY    60 // In seconds
-#define PSU_POWER_OFF_TO_ON_DELAY       2 // In seconds
+// In seconds
+#define PSU_POWER_ON_BOOT_DELAY         30
+#define PSU_POWER_OFF_SHUTDOWN_DELAY    60
+#define PSU_POWER_OFF_TO_ON_DELAY       2
 
 enum psu_state
 {
@@ -37,9 +38,11 @@ static struct button_module* psu_button = NULL;
 static enum psu_state psu_state = PSU_EVENT_WAIT;
 static enum psu_status psu_status = PSU_OFF;
 
-static void psu_button_event_handler(enum button_event event)
+static void psu_button_event_handler(struct button_module* button, enum button_event event)
 {
-    if(psu_state != PSU_EVENT_WAIT || psu_status == PSU_ABOUT_TO_POWER_OFF)
+    (void)button;
+
+    if(psu_state != PSU_EVENT_WAIT && psu_status != PSU_ABOUT_TO_POWER_OFF)
         return;
 
     switch(event) {
@@ -71,7 +74,7 @@ static int psu_rtask_init(void)
     io_configure(IO_DIRECTION_DOUT_LOW, &psu_control_pin, 1);
     
     // Init button
-    psu_button = button_construct(&psu_button_pin, true);
+    psu_button = button_construct(&psu_button_pin, false);
     if(psu_button == NULL)
         goto fail_button;
     button_register_event_handler(psu_button, psu_button_event_handler);
