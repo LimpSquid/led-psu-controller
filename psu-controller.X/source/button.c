@@ -88,7 +88,7 @@ struct button_module* button_construct(const struct io_pin* pin, bool invert)
     if(pin == NULL)
         return button;
 
-    // Search for an unused timer
+    // Search for an unused button
     for(unsigned int i = 0; i < BUTTON_POOL_SIZE; ++i) {
         if(!button_pool[i].opt.assigned) {
             button = &button_pool[i];
