@@ -32,6 +32,7 @@ KERN_SIMPLE_RTASK(psu, psu_rtask_init, psu_rtask_execute);
 static const struct io_pin psu_signal_pin = IO_PIN(4, D);
 static const struct io_pin psu_control_pin = IO_PIN(0, D);
 static const struct io_pin psu_button_pin = IO_PIN(5, D);
+static const struct io_pin psu_fan_pin = IO_PIN(11, D);
 
 static struct timer_module* psu_countdown_timer = NULL;
 static struct button_module* psu_button = NULL;
@@ -72,6 +73,7 @@ static int psu_rtask_init(void)
     // Configure IO
     io_configure(IO_DIRECTION_DOUT_LOW, &psu_signal_pin, 1);
     io_configure(IO_DIRECTION_DOUT_LOW, &psu_control_pin, 1);
+    io_configure(IO_DIRECTION_DOUT_LOW, &psu_fan_pin, 1);
     
     // Init button
     psu_button = button_construct(&psu_button_pin, false);
@@ -107,6 +109,7 @@ static void psu_rtask_execute(void)
         case PSU_POWER_ON:
             IO_SET(psu_signal_pin);
             IO_SET(psu_control_pin);
+            IO_SET(psu_fan_pin);
             timer_start(psu_countdown_timer, PSU_POWER_ON_BOOT_DELAY, TIMER_TIME_UNIT_S);
             psu_status = PSU_ON;
             psu_state = PSU_EVENT_DONE;
@@ -120,6 +123,7 @@ static void psu_rtask_execute(void)
             break;
         case PSU_POWER_OFF_DO:
             IO_CLR(psu_control_pin);
+            IO_CLR(psu_fan_pin);
             timer_start(psu_countdown_timer, PSU_POWER_OFF_TO_ON_DELAY, TIMER_TIME_UNIT_S);
             psu_status = PSU_OFF;
             psu_state = PSU_EVENT_DONE;
