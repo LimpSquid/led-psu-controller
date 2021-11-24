@@ -13,11 +13,6 @@
 #define SYS_FAIL_IF(expression)     if(expression) { exit(EXIT_FAILURE); }
 #define SYS_FAIL_IF_NOT(expression) SYS_FAIL_IF(!(expression))
 
-// Version ranges between 0 - 255
-#define SYS_VERSION_MAJOR           0
-#define SYS_VERSION_MINOR           0
-#define SYS_VERSION_PATCH           0
-
 // Macros for performance reasons
 #define SYS_GOODNIGHT_BONZO()       WDTCONbits.ON = 0
 #define SYS_WAKEUP_BONZO()          WDTCONbits.ON = 1
