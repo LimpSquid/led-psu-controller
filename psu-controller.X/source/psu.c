@@ -29,32 +29,32 @@ static int psu_rtask_init(void);
 static void psu_rtask_execute(void);
 KERN_SIMPLE_RTASK(psu, psu_rtask_init, psu_rtask_execute);
 
-static const struct io_pin psu_signal_pin = IO_PIN(4, D);
-static const struct io_pin psu_control_pin = IO_PIN(0, D);
-static const struct io_pin psu_button_pin = IO_PIN(5, D);
-static const struct io_pin psu_fan_pin = IO_PIN(11, D);
+static struct io_pin const psu_signal_pin = IO_PIN(4, D);
+static struct io_pin const psu_control_pin = IO_PIN(0, D);
+static struct io_pin const psu_button_pin = IO_PIN(5, D);
+static struct io_pin const psu_fan_pin = IO_PIN(11, D);
 
-static struct timer_module* psu_countdown_timer = NULL;
-static struct button_module* psu_button = NULL;
+static struct timer_module * psu_countdown_timer = NULL;
+static struct button_module * psu_button = NULL;
 static enum psu_state psu_state = PSU_EVENT_WAIT;
 static enum psu_status psu_status = PSU_OFF;
 
-static void psu_button_event_handler(struct button_module* button, enum button_event event)
+static void psu_button_event_handler(struct button_module * button, enum button_event event)
 {
     (void)button;
 
-    if(psu_state != PSU_EVENT_WAIT && psu_status != PSU_ABOUT_TO_POWER_OFF)
+    if (psu_state != PSU_EVENT_WAIT && psu_status != PSU_ABOUT_TO_POWER_OFF)
         return;
 
-    switch(event) {
+    switch (event) {
         case BUTTON_CLICK:
-            switch(psu_status) {
+            switch (psu_status) {
                 case PSU_OFF:   psu_state = PSU_POWER_ON;   break;
                 default:;
             }
             break;
         case BUTTON_PRESS_LONG:
-            switch(psu_status) {
+            switch (psu_status) {
                 case PSU_ON:    psu_state = PSU_POWER_OFF;  break;
                 case PSU_OFF:   psu_state = PSU_POWER_ON;   break;
                 case PSU_ABOUT_TO_POWER_OFF:
@@ -77,13 +77,13 @@ static int psu_rtask_init(void)
     
     // Init button
     psu_button = button_construct(&psu_button_pin, false);
-    if(psu_button == NULL)
+    if (psu_button == NULL)
         goto fail_button;
     button_register_event_handler(psu_button, psu_button_event_handler);
     
     // Init timer
     psu_countdown_timer = timer_construct(TIMER_TYPE_COUNTDOWN, NULL);
-    if(psu_countdown_timer == NULL)
+    if (psu_countdown_timer == NULL)
         goto fail_timer;
     
     return KERN_INIT_SUCCESS;
@@ -97,10 +97,10 @@ fail_button:
 
 static void psu_rtask_execute(void)
 {
-    if(timer_is_running(psu_countdown_timer))
+    if (timer_is_running(psu_countdown_timer))
         return;
     
-    switch(psu_state) {
+    switch (psu_state) {
         default:
         case PSU_EVENT_WAIT:
             // Nothing to see here, changing state in button event handler
