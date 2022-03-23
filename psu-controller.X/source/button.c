@@ -26,12 +26,12 @@ struct button_module
     unsigned int pressed_ticks;
     bool sample_pressed;
     bool pressed;
-    
+
     struct
     {
-        unsigned char invert            :1;
-        unsigned char assigned          :1;
-        unsigned char _                 :6;
+        unsigned char invert    :1;
+        unsigned char assigned  :1;
+        unsigned char           :6;
     } opt;
 };
 
@@ -68,7 +68,7 @@ static void button_ttask_execute(void)
                     button_event(button, BUTTON_RELEASE);
                     button_event(button, button->pressed_ticks < BUTTON_PRESS_LONG_TICKS ? BUTTON_CLICK : BUTTON_CLICK_LONG);
                 }
-            } else if (button->pressed && button->pressed_ticks < UINT_MAX && 
+            } else if (button->pressed && button->pressed_ticks < UINT_MAX &&
                 ++button->pressed_ticks == BUTTON_PRESS_LONG_TICKS)
                     button_event(button, BUTTON_PRESS_LONG);
         }
@@ -102,7 +102,7 @@ struct button_module * button_construct(struct io_pin const * pin, bool invert)
     // Configure button, if found
     if (button != NULL) {
         io_configure(IO_DIRECTION_DIN, pin, 1);
-        
+
         button->pin = pin;
         button->event_handler = NULL;
         button->pressed = invert;
